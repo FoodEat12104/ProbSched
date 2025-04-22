@@ -1,0 +1,10 @@
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
+#include <string.h>
+#include "distributions.h"
+#include "process.h"
+#include "stats.h"
+#include "queue.h"
+#include "scheduler.h"
