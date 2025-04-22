@@ -1,18 +1,24 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#include <stdbool.h>
+
 typedef struct {
     int pid;
     int arrival_time;
     int burst_time;
-    int priority;
     int remaining_time;
+    int priority;
     int deadline;
-    int period; // Para processos periódicos
+    int period;
+    int completion_time;  
+    int waiting_time;     
 } Process;
 
-Process *generate_processes(int n);
+Process *generate_processes(int n, bool real_time);
 void print_process(Process p);
 void print_processes(Process *processes, int n);
+void free_processes(Process *processes);
+void reset_processes(Process *processes, int n);
 
 #endif
