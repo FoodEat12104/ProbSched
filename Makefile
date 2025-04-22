@@ -23,8 +23,8 @@ queue.o: $(SRC)/queue.c include/probsched.h
 scheduler.o: $(SRC)/scheduler.c include/probsched.h
 	$(CC) $(CFLAGS) $(SRC)/scheduler.c -o scheduler.o
 
-stats.o: $(SRC)/stats.c include/probsched.h
-	$(CC) $(CFLAGS) $(SRC)/stats.c -o stats.o
+# stats.o: $(SRC)/stats.c include/probsched.h
+#	$(CC) $(CFLAGS) $(SRC)/stats.c -o stats.o
 
 utils.o: $(SRC)/utils.c include/probsched.h
 	$(CC) $(CFLAGS) $(SRC)/utils.c -o utils.o
