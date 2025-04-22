@@ -14,24 +14,26 @@ probsched: $(OBJ)
 main.o: $(SRC)/main.c include/probsched.h
 	$(CC) $(CFLAGS) $(SRC)/main.c -o main.o
 
-process.o: $(SRC)/process.c include/process.h
+process.o: $(SRC)/process.c include/probsched.h
 	$(CC) $(CFLAGS) $(SRC)/process.c -o process.o
 
-queue.o: $(SRC)/queue.c include/queue.h
+queue.o: $(SRC)/queue.c include/probsched.h
 	$(CC) $(CFLAGS) $(SRC)/queue.c -o queue.o
 
-scheduler.o: $(SRC)/scheduler.c include/scheduler.h
+scheduler.o: $(SRC)/scheduler.c include/probsched.h
 	$(CC) $(CFLAGS) $(SRC)/scheduler.c -o scheduler.o
 
-stats.o: $(SRC)/stats.c include/stats.h
+stats.o: $(SRC)/stats.c include/probsched.h
 	$(CC) $(CFLAGS) $(SRC)/stats.c -o stats.o
 
 utils.o: $(SRC)/utils.c include/probsched.h
 	$(CC) $(CFLAGS) $(SRC)/utils.c -o utils.o
 
-distributions.o: $(SRC)/distributions.c include/distributions.h
+distributions.o: $(SRC)/distributions.c include/probsched.h
 	$(CC) $(CFLAGS) $(SRC)/distributions.c -o distributions.o
 
 clean limpar:
-	rm -f probsched *.o *~
+	rm -f probsched *.o
+	rm -f *~
 	echo "Remover: Ficheiros executáveis, objetos e temporários."
+
