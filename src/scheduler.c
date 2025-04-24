@@ -596,6 +596,7 @@ SchedulerStats calculate_stats(Process *processes, int n, int total_time) {
     float total_waiting = 0;
     float total_turnaround = 0;
     int count = 0;
+    int deadline_misses = 0;
     
     for (int i = 0; i < n; i++) {
         if (processes[i].completion_time > 0) {
@@ -604,6 +605,11 @@ SchedulerStats calculate_stats(Process *processes, int n, int total_time) {
             total_waiting += waiting;
             total_turnaround += turnaround;
             count++;
+
+            // Verificar se o deadline foi perdido
+            if (processes[i].deadline > 0 && processes[i].completion_time > processes[i].deadline) {
+                deadline_misses++;
+            }
         }
     }
     
@@ -611,6 +617,16 @@ SchedulerStats calculate_stats(Process *processes, int n, int total_time) {
         stats.avg_waiting_time = total_waiting / count;
         stats.avg_turnaround_time = total_turnaround / count;
     }
+    stats.deadline_misses = deadline_misses;
     
     return stats;
+}
+
+void print_stats(SchedulerStats stats) {
+    printf("\n=== Estatísticas da Simulação ===\n");
+    printf("Tempo médio de espera: %.2f\n", stats.avg_waiting_time);
+    printf("Tempo médio de turnaround: %.2f\n", stats.avg_turnaround_time);
+    printf("Utilização da CPU: %.2f%%\n", stats.cpu_utilization);
+    printf("Throughput: %.2f processos/unidade de tempo\n", stats.throughput);
+    printf("Deadlines perdidos: %d\n", stats.deadline_misses);
 }

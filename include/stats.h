@@ -7,7 +7,8 @@ typedef struct {
     float avg_waiting_time;
     float avg_turnaround_time;
     float cpu_utilization; // (%)
-    float throughput;      // processos por unidade de tempo
+    float throughput;   
+    int deadline_misses;   // processos por unidade de tempo
 } SchedulerStats;
 
 /**
@@ -18,5 +19,7 @@ typedef struct {
  * @return Estrutura SchedulerStats com as estatísticas.
  */
 SchedulerStats calculate_stats(Process *processes, int n, int total_time);
+
+
 
 #endif

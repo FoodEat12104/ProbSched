@@ -6,6 +6,7 @@
 #include "scheduler.h" 
 #include "distributions.h"
 
+
 void print_usage(const char *program_name) {
     printf("Uso: %s <algoritmo> <num_processos> [quantum]\n", program_name);
     printf("Algoritmos disponíveis:\n");
@@ -47,6 +48,8 @@ int main(int argc, char *argv[]) {
     
     print_processes(processes, num_processes);
 
+    int total_time = 0;
+
     // Executa o algoritmo selecionado
     if (strcmp(algorithm, "FCFS") == 0) {
         run_fcfs(processes, num_processes);
@@ -84,6 +87,16 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // Calcular o tempo total de execução
+    for (int i = 0; i < num_processes; i++) {
+        if (processes[i].completion_time > total_time) {
+            total_time = processes[i].completion_time;
+        }
+    }
+
+
+    SchedulerStats stats = calculate_stats(processes, num_processes, total_time);
+    print_stats(stats);
     free_processes(processes);
     return 0;
 }
