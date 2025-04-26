@@ -12,7 +12,8 @@ typedef struct {
     int deadline;
     int period;
     int completion_time;  
-    int waiting_time;     
+    int waiting_time;
+    int deadline_misses;  // Added for real-time scheduling statistics
 } Process;
 
 Process *generate_processes(int n, bool real_time);
