@@ -5,17 +5,16 @@
 
 void print_initial_state(Process *processes, int n) {
     printf("\n=== Simulador de Escalonamento de Processos ===\n");
-    printf("%-5s %-8s %-6s %-10s %-9s %-7s\n",
-           "PID", "Chegada", "Burst", "Prioridade", "Deadline", "Período");
-    printf("----------------------------------------------------\n");
+    printf("%-5s %-8s %-6s %-10s %-7s\n",
+           "PID", "Chegada", "Burst", "Prioridade", "Período");
+    printf("-----------------------------------------\n");
     
     for (int i = 0; i < n; i++) {
-        printf("%-5d %-8d %-6d %-10d %-9d ",
+        printf("%-5d %-8d %-6d %-10d ",
                processes[i].pid, 
                processes[i].arrival_time,
                processes[i].burst_time,
-               processes[i].priority,
-               processes[i].deadline);
+               processes[i].priority);
         
         if (processes[i].period > 0) {
             printf("%-7d\n", processes[i].period);
@@ -47,19 +46,17 @@ void print_timeline(Process *processes, int n) {
 
 void print_final_results(Process *processes, int n) {
     printf("\n=== Resultado Final ===\n");
-    printf("%-5s %-8s %-6s %-10s %-9s %-7s %-10s %-6s\n",
-           "PID", "Chegada", "Burst", "Prioridade", "Deadline", "Período", 
+    printf("%-5s %-8s %-6s %-10s %-7s %-10s %-6s\n",
+           "PID", "Chegada", "Burst", "Prioridade", "Período", 
            "Finalizado", "Espera");
-    printf("-----------------------------------------------------------");
-    printf("-----------------------\n");
+    printf("----------------------------------------------------------\n");
     
     for (int i = 0; i < n; i++) {
-        printf("%-5d %-8d %-6d %-10d %-9d ",
+        printf("%-5d %-8d %-6d %-10d ",
                processes[i].pid, 
                processes[i].arrival_time,
                processes[i].burst_time,
-               processes[i].priority,
-               processes[i].deadline);
+               processes[i].priority);
 
         // Período
         if (processes[i].period > 0) {
