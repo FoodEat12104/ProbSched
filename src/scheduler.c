@@ -40,7 +40,7 @@ void run_fcfs(Process *processes, int n) {
     }
 }
 
-void run_sj(Process *processes, int n) {    
+void run_sjf(Process *processes, int n) {    
     int current_time = 0;
     int completed = 0;
     int *completed_flags = calloc(n, sizeof(int));
@@ -146,48 +146,56 @@ void run_priority_preemptive(Process *processes, int n) {
     free(remaining_time);
 }
 
-void run_rr(Process *processes, int n, int quantum) {    
+void run_rr(Process *processes, int n, int quantum) {
     int *remaining_time = malloc(n * sizeof(int));
     int *last_execution = malloc(n * sizeof(int));
+    int current_time = 0;
     
     for (int i = 0; i < n; i++) {
         remaining_time[i] = processes[i].burst_time;
         last_execution[i] = processes[i].arrival_time;
+        processes[i].waiting_time = 0;
     }
-    
-    int current_time = 0;
-    int completed = 0;
-    
-    while (completed < n) {
-        bool any_executed = false;
-        
+
+    while (1) {
+        bool all_done = true;
+        bool executed = false;
+
         for (int i = 0; i < n; i++) {
-            if (remaining_time[i] > 0 && processes[i].arrival_time <= current_time) {
-                any_executed = true;
+            if (remaining_time[i] > 0) {
+                all_done = false;
                 
-                processes[i].waiting_time += current_time - last_execution[i];
-                
-                int exec_time = (remaining_time[i] > quantum) ? quantum : remaining_time[i];
-                current_time += exec_time;
-                remaining_time[i] -= exec_time;
-                last_execution[i] = current_time;
-                
-                if (remaining_time[i] == 0) {
-                    completed++;
-                    processes[i].completion_time = current_time;
+                if (processes[i].arrival_time <= current_time) {
+                    executed = true;
+                    
+                    // Atualiza tempo de espera
+                    processes[i].waiting_time += current_time - last_execution[i];
+                    
+                    // Executa por quantum ou tempo restante
+                    int exec_time = (remaining_time[i] > quantum) ? quantum : remaining_time[i];
+                    current_time += exec_time;
+                    remaining_time[i] -= exec_time;
+                    last_execution[i] = current_time;
+                    
+                    if (remaining_time[i] == 0) {
+                        processes[i].completion_time = current_time;
+                    }
+                    
+                    break; // Interrompe após executar um processo
                 }
             }
         }
+
+        if (all_done) break;
         
-        if (!any_executed) {
-            current_time++;
+        if (!executed) {
+            current_time++; // Tempo ocioso
         }
     }
-    
+
     free(remaining_time);
     free(last_execution);
 }
-
 
 void run_rate_monotonic(Process *processes, int n) {
     // 1. Filtrar apenas processos periódicos válidos (período > 0)

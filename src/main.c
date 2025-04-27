@@ -11,7 +11,7 @@ void print_usage(const char *program_name) {
     printf("Uso: %s <algoritmo> <num_processos> [quantum]\n", program_name);
     printf("Algoritmos disponíveis:\n");
     printf("  FCFS          - First-Come, First-Served\n");
-    printf("  SJ            - Shortest Job\n");
+    printf("  SJF           - Shortest Job First\n");
     printf("  PRIORITY_NP   - Priority Scheduling (não preemptivo)\n");
     printf("  PRIORITY_P    - Priority Scheduling (preemptivo)\n");
     printf("  RR            - Round Robin (requer quantum)\n");
@@ -44,9 +44,9 @@ int main(int argc, char *argv[]) {
         printf("\n=== Executando FCFS (First-Come, First-Served) ===\n");
         run_fcfs(processes, num_processes);
     } 
-    else if (strcmp(algorithm, "SJ") == 0) {
+    else if (strcmp(algorithm, "SJF") == 0) {
         printf("\n=== Executando SJ (Shortest Job First) ===\n");
-        run_sj(processes, num_processes);
+        run_sjf(processes, num_processes);
     }
     else if (strcmp(algorithm, "PRIORITY_NP") == 0) {
         printf("\n=== Executando Priority Scheduling não preemptivo ===\n");

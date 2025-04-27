@@ -6,7 +6,7 @@
 
 // Declarações de funções para algoritmos básicos
 void run_fcfs(Process *processes, int n);
-void run_sj(Process *processes, int n);
+void run_sjf(Process *processes, int n);
 
 // Funções para Priority Scheduling
 void run_priority_nonpreemptive(Process *processes, int n);
