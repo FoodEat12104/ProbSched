@@ -43,18 +43,21 @@ int main(int argc, char *argv[]) {
     if (strcmp(algorithm, "FCFS") == 0) {
         printf("\n=== Executando FCFS (First-Come, First-Served) ===\n");
         run_fcfs(processes, num_processes);
+        print_non_preemptive(processes, num_processes);
     } 
     else if (strcmp(algorithm, "SJF") == 0) {
-        printf("\n=== Executando SJ (Shortest Job First) ===\n");
+        printf("\n=== Executando SJF (Shortest Job First) ===\n");
         run_sjf(processes, num_processes);
+        print_non_preemptive(processes, num_processes);
     }
     else if (strcmp(algorithm, "PRIORITY_NP") == 0) {
         printf("\n=== Executando Priority Scheduling não preemptivo ===\n");
         run_priority_nonpreemptive(processes, num_processes);
+        print_non_preemptive(processes, num_processes);
     }
     else if (strcmp(algorithm, "PRIORITY_P") == 0) {
         printf("\n=== Executando Priority Scheduling preemptivo ===\n");
-        run_priority_preemptive(processes, num_processes);
+        print_priority_preemptive(processes, num_processes);
     }
     else if (strcmp(algorithm, "RR") == 0) {
         if (quantum <= 0) {
@@ -64,14 +67,17 @@ int main(int argc, char *argv[]) {
         }
         printf("\n=== Executando Round Robin (Quantum=%d) ===\n", quantum);
         run_rr(processes, num_processes, quantum);
+        print_rr(processes, num_processes, quantum);
     }
     else if (strcmp(algorithm, "RM") == 0) {
         printf("\n=== Executando Rate Monotonic Scheduling ===\n");
         run_rate_monotonic(processes, num_processes);
+        print_preemptive(processes, num_processes, true);
     }
     else if (strcmp(algorithm, "EDF") == 0) {
         printf("\n=== Executando Earliest Deadline First Scheduling ===\n");
         run_edf(processes, num_processes);
+        print_preemptive(processes, num_processes, false);
     }
     else {
         printf("Erro: Algoritmo desconhecido!\n");
@@ -89,7 +95,6 @@ int main(int argc, char *argv[]) {
     }
 
     // Mostra resultados
-    print_timeline(processes, num_processes);
     print_final_results(processes, num_processes);
     
     SchedulerStats stats = calculate_stats(processes, num_processes, total_time);

@@ -7,28 +7,39 @@
 #include <math.h>
 #include <limits.h>
 
-bool all_processes_completed(Process *processes, int n) {
-    for (int i = 0; i < n; i++) {
-        if (processes[i].remaining_time > 0) {
-            return false;
-        }
-    }
-    return true;
+// Função auxiliar para qsort - ordenar por tempo de chegada
+static int compare_arrival(const void *a, const void *b) {
+    const Process *p1 = (const Process *)a;
+    const Process *p2 = (const Process *)b;
+    return p1->arrival_time - p2->arrival_time;
 }
 
-void run_fcfs(Process *processes, int n) {  
-    for (int i = 0; i < n-1; i++) {
-        for (int j = i+1; j < n; j++) {
-            if (processes[j].arrival_time < processes[i].arrival_time) {
-                Process temp = processes[i];
-                processes[i] = processes[j];
-                processes[j] = temp;
-            }
-        }
+// Função auxiliar para qsort - ordenar por período (Rate Monotonic)
+static int compare_period(const void *a, const void *b) {
+    const Process *p1 = (const Process *)a;
+    const Process *p2 = (const Process *)b;
+    return p1->period - p2->period;
+}
+
+// Funções auxiliares para LCM (Rate Monotonic e EDF)
+int gcd(int a, int b) {
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
     }
+    return a;
+}
+
+int lcm(int a, int b) {
+    if (a == 0 || b == 0) return 0;
+    return (a / gcd(a, b)) * b;
+}
+
+void run_fcfs(Process *processes, int n) {
+    qsort(processes, n, sizeof(Process), compare_arrival);
     
     int current_time = 0;
-    
     for (int i = 0; i < n; i++) {
         if (current_time < processes[i].arrival_time) {
             current_time = processes[i].arrival_time;
@@ -40,14 +51,16 @@ void run_fcfs(Process *processes, int n) {
     }
 }
 
-void run_sjf(Process *processes, int n) {    
+void run_sjf(Process *processes, int n) {
+    int *completed_flags = calloc(n, sizeof(int));
+    if (!completed_flags) return;
+    
     int current_time = 0;
     int completed = 0;
-    int *completed_flags = calloc(n, sizeof(int));
     
     while (completed < n) {
         int shortest_index = -1;
-        int shortest_burst = __INT_MAX__;
+        int shortest_burst = INT_MAX;
         
         for (int i = 0; i < n; i++) {
             if (!completed_flags[i] && processes[i].arrival_time <= current_time && 
@@ -72,14 +85,16 @@ void run_sjf(Process *processes, int n) {
     free(completed_flags);
 }
 
-void run_priority_nonpreemptive(Process *processes, int n) {    
+void run_priority_nonpreemptive(Process *processes, int n) {
+    int *completed_flags = calloc(n, sizeof(int));
+    if (!completed_flags) return;
+    
     int current_time = 0;
     int completed = 0;
-    int *completed_flags = calloc(n, sizeof(int));
     
     while (completed < n) {
         int highest_priority_index = -1;
-        int highest_priority = __INT_MAX__;
+        int highest_priority = INT_MAX;
         
         for (int i = 0; i < n; i++) {
             if (!completed_flags[i] && processes[i].arrival_time <= current_time && 
@@ -104,52 +119,54 @@ void run_priority_nonpreemptive(Process *processes, int n) {
     free(completed_flags);
 }
 
-void run_priority_preemptive(Process *processes, int n) {    
-    int *remaining_time = malloc(n * sizeof(int));
-    
-    for (int i = 0; i < n; i++) {
-        remaining_time[i] = processes[i].burst_time;
-    }
-    
-    int current_time = 0;
+void run_priority_preemptive(Process *processes, int n) {
+      int time = 0;
     int completed = 0;
     
+    // Inicializa remaining_time
+    for (int i = 0; i < n; i++) {
+        processes[i].remaining_time = processes[i].burst_time;
+    }
+
     while (completed < n) {
-        int highest_priority_index = -1;
-        int highest_priority = __INT_MAX__;
-        
+        int highest_priority = INT_MAX;
+        int selected = -1;
+
+        // Encontra o processo com maior prioridade (menor número) que já chegou e ainda tem trabalho
         for (int i = 0; i < n; i++) {
-            if (remaining_time[i] > 0 && processes[i].arrival_time <= current_time && 
-                processes[i].priority < highest_priority) {
-                highest_priority = processes[i].priority;
-                highest_priority_index = i;
+            if (processes[i].arrival_time <= time && processes[i].remaining_time > 0) {
+                if (processes[i].priority < highest_priority) {
+                    highest_priority = processes[i].priority;
+                    selected = i;
+                }
             }
         }
-        
-        if (highest_priority_index == -1) {
-            current_time++;
+
+        if (selected == -1) {
+            time++;
             continue;
         }
-        
-        remaining_time[highest_priority_index]--;
-        current_time++;
-        
-        if (remaining_time[highest_priority_index] == 0) {
+
+        // Executa o processo por 1 unidade de tempo
+        processes[selected].remaining_time--;
+        time++;
+
+        // Verifica se o processo foi concluído
+        if (processes[selected].remaining_time == 0) {
             completed++;
-            processes[highest_priority_index].completion_time = current_time;
-            processes[highest_priority_index].waiting_time = processes[highest_priority_index].completion_time - 
-                                                          processes[highest_priority_index].arrival_time - 
-                                                          processes[highest_priority_index].burst_time;
+            processes[selected].completion_time = time;
         }
     }
-    
-    free(remaining_time);
 }
 
 void run_rr(Process *processes, int n, int quantum) {
     int *remaining_time = malloc(n * sizeof(int));
     int *last_execution = malloc(n * sizeof(int));
-    int current_time = 0;
+    if (!remaining_time || !last_execution) {
+        free(remaining_time);
+        free(last_execution);
+        return;
+    }
     
     for (int i = 0; i < n; i++) {
         remaining_time[i] = processes[i].burst_time;
@@ -157,6 +174,7 @@ void run_rr(Process *processes, int n, int quantum) {
         processes[i].waiting_time = 0;
     }
 
+    int current_time = 0;
     while (1) {
         bool all_done = true;
         bool executed = false;
@@ -167,11 +185,8 @@ void run_rr(Process *processes, int n, int quantum) {
                 
                 if (processes[i].arrival_time <= current_time) {
                     executed = true;
-                    
-                    // Atualiza tempo de espera
                     processes[i].waiting_time += current_time - last_execution[i];
                     
-                    // Executa por quantum ou tempo restante
                     int exec_time = (remaining_time[i] > quantum) ? quantum : remaining_time[i];
                     current_time += exec_time;
                     remaining_time[i] -= exec_time;
@@ -180,17 +195,13 @@ void run_rr(Process *processes, int n, int quantum) {
                     if (remaining_time[i] == 0) {
                         processes[i].completion_time = current_time;
                     }
-                    
-                    break; // Interrompe após executar um processo
+                    break;
                 }
             }
         }
 
         if (all_done) break;
-        
-        if (!executed) {
-            current_time++; // Tempo ocioso
-        }
+        if (!executed) current_time++;
     }
 
     free(remaining_time);
@@ -198,30 +209,21 @@ void run_rr(Process *processes, int n, int quantum) {
 }
 
 void run_rate_monotonic(Process *processes, int n) {
-    // 1. Filtrar apenas processos periódicos válidos (período > 0)
-    int valid_processes = 0;
+    // Filtrar processos periódicos válidos
+    int valid_count = 0;
     for (int i = 0; i < n; i++) {
-        if (processes[i].period > 0) valid_processes++;
+        if (processes[i].period > 0) valid_count++;
     }
 
-    if (valid_processes == 0) {
-        printf("AVISO: Nenhum processo periódico válido (período > 0)\n");
+    if (valid_count == 0) {
+        printf("Nenhum processo periódico válido (período > 0)\n");
         return;
     }
 
-    // 2. Ordenar por período (menor período = maior prioridade)
-    for (int i = 0; i < n-1; i++) {
-        for (int j = i+1; j < n; j++) {
-            if (processes[j].period > 0 && (processes[i].period == 0 || 
-                processes[j].period < processes[i].period)) {
-                Process temp = processes[i];
-                processes[i] = processes[j];
-                processes[j] = temp;
-            }
-        }
-    }
+    // Ordenar por período (Rate Monotonic)
+    qsort(processes, n, sizeof(Process), compare_period);
 
-    // 3. Cálculo da utilização apenas para processos válidos
+    // Calcular utilização e limite
     float utilization = 0;
     for (int i = 0; i < n; i++) {
         if (processes[i].period > 0) {
@@ -229,38 +231,36 @@ void run_rate_monotonic(Process *processes, int n) {
         }
     }
 
-    float bound = valid_processes * (pow(2, 1.0/valid_processes) - 1);
-    printf("- Utilização total: %.2f\n", utilization);
-    printf("- Limite de escalonabilidade: %.2f\n", bound);
+    float bound = valid_count * (pow(2, 1.0/valid_count) - 1);
+    printf("Utilização: %.2f, Limite: %.2f\n", utilization, bound);
 
-    // 4. Simulação mesmo se não escalonável (modo best-effort)
+    // Inicializar estruturas
     int *remaining_time = malloc(n * sizeof(int));
     int *next_release = malloc(n * sizeof(int));
-    int hyperperiod = 1;
-    int current_time = 0;
-    int completed = 0;
+    if (!remaining_time || !next_release) {
+        free(remaining_time);
+        free(next_release);
+        return;
+    }
 
-    // Inicialização
+    int hyperperiod = 1;
     for (int i = 0; i < n; i++) {
         remaining_time[i] = 0;
         next_release[i] = processes[i].arrival_time;
-        processes[i].completion_time = -1;
-        processes[i].waiting_time = -1;
         if (processes[i].period > 0) {
             hyperperiod = lcm(hyperperiod, processes[i].period);
         }
     }
 
-    printf("- Simulando em modo best-effort (hiperperíodo: %d)\n", hyperperiod);
-
-    while (current_time < hyperperiod && completed < valid_processes) {
+    // Simulação
+    int current_time = 0;
+    while (current_time < hyperperiod) {
         // Liberar processos
         for (int i = 0; i < n; i++) {
-        if (processes[i].period > 0 && current_time >= processes[i].arrival_time && 
-            current_time == next_release[i]) {
-            remaining_time[i] = processes[i].burst_time;
-            next_release[i] += processes[i].period;
-        }
+            if (processes[i].period > 0 && current_time >= next_release[i]) {
+                remaining_time[i] = processes[i].burst_time;
+                next_release[i] += processes[i].period;
+            }
         }
 
         // Selecionar processo
@@ -277,20 +277,13 @@ void run_rate_monotonic(Process *processes, int n) {
             remaining_time[selected]--;
             
             if (remaining_time[selected] == 0) {
-                processes[selected].completion_time = current_time + 1;
-                processes[selected].waiting_time = (current_time + 1) - 
-                                                processes[selected].arrival_time - 
-                                                processes[selected].burst_time;
-                completed++;
-                
-                // Verificar deadline
                 int deadline = next_release[selected] - processes[selected].period;
+                processes[selected].completion_time = current_time + 1;
+                processes[selected].waiting_time = current_time + 1 - 
+                    processes[selected].arrival_time - processes[selected].burst_time;
+                
                 if (processes[selected].completion_time > deadline) {
                     processes[selected].deadline_misses++;
-                    printf("! Deadline perdido para PID %d (tempo %d > deadline %d)\n",
-                           processes[selected].pid, 
-                           processes[selected].completion_time,
-                           deadline);
                 }
             }
         }
@@ -302,40 +295,36 @@ void run_rate_monotonic(Process *processes, int n) {
 }
 
 void run_edf(Process *processes, int n) {
-    // 1. Pré-processamento
-    int has_periodic = 0;
+    // Calcular tempo de simulação
     int simulation_time = 0;
-
-    // Calcular tempo de simulação (hiperperíodo ou tempo até último deadline)
     for (int i = 0; i < n; i++) {
         if (processes[i].period > 0) {
-            has_periodic = 1;
             simulation_time = lcm(simulation_time, processes[i].period);
         } else if (processes[i].deadline > simulation_time) {
             simulation_time = processes[i].deadline;
         }
     }
+    if (simulation_time == 0) simulation_time = 100;
 
-    if (!has_periodic) {
-        simulation_time = (simulation_time == 0) ? 100 : simulation_time;
-    }
-
-    printf("- Tempo de simulação: %d unidades\n", simulation_time);
-
-    // 2. Simulação
+    // Inicializar estruturas
     int *remaining_time = malloc(n * sizeof(int));
     int *next_release = malloc(n * sizeof(int));
-    int current_time = 0;
+    if (!remaining_time || !next_release) {
+        free(remaining_time);
+        free(next_release);
+        return;
+    }
 
-    // Inicialização
     for (int i = 0; i < n; i++) {
         remaining_time[i] = 0;
         next_release[i] = processes[i].arrival_time;
         processes[i].deadline_misses = 0;
     }
 
+    // Simulação
+    int current_time = 0;
     while (current_time <= simulation_time) {
-        // Liberação de processos
+        // Liberar processos
         for (int i = 0; i < n; i++) {
             if (current_time == next_release[i]) {
                 remaining_time[i] = processes[i].burst_time;
@@ -345,7 +334,7 @@ void run_edf(Process *processes, int n) {
             }
         }
 
-        // Seleção EDF
+        // Selecionar EDF
         int selected = -1;
         int earliest_deadline = INT_MAX;
 
@@ -367,11 +356,9 @@ void run_edf(Process *processes, int n) {
             
             if (remaining_time[selected] == 0) {
                 processes[selected].completion_time = current_time + 1;
-                processes[selected].waiting_time = (current_time + 1) - 
-                                                processes[selected].arrival_time - 
-                                                processes[selected].burst_time;
+                processes[selected].waiting_time = current_time + 1 - 
+                    processes[selected].arrival_time - processes[selected].burst_time;
                 
-                // Verificação de deadline
                 if (processes[selected].completion_time > earliest_deadline) {
                     processes[selected].deadline_misses++;
                 }
@@ -382,17 +369,4 @@ void run_edf(Process *processes, int n) {
 
     free(remaining_time);
     free(next_release);
-}
-
-int gcd(int a, int b) {
-    while (b != 0) {
-        int temp = b;
-        b = a % b;
-        a = temp;
-    }
-    return a;
-}
-
-int lcm(int a, int b) {
-    return (a / gcd(a, b)) * b;
 }

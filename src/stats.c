@@ -49,7 +49,7 @@ SchedulerStats calculate_stats(Process *processes, int n, int total_time) {
 }
 
 void print_stats(SchedulerStats stats) {
-    printf("\n=== Estatísticas da Simulação ===\n");
+    printf("\n=== Estatísticas da Simulação ===\n\n");
     printf("- Tempo médio de espera: %.2f\n", stats.avg_waiting_time);
     printf("- Tempo médio de turnaround: %.2f\n", stats.avg_turnaround_time);
     printf("- Utilização da CPU: %.2f%%\n", stats.cpu_utilization);
