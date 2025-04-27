@@ -5,7 +5,7 @@
 #include "process.h"
 #include "scheduler.h" 
 #include "distributions.h"
-
+#include "utils.h"
 
 void print_usage(const char *program_name) {
     printf("Uso: %s <algoritmo> <num_processos> [quantum]\n", program_name);
@@ -31,39 +31,34 @@ int main(int argc, char *argv[]) {
     int quantum = (argc > 3) ? atoi(argv[3]) : 0;
     
     if (num_processes <= 0) {
-        printf("Número de processos deve ser positivo\n");
+        printf("Número de processos deve ser positivo!\n");
         return 1;
     }
 
-    // Determina se é algoritmo de tempo real
     bool is_real_time = (strcmp(algorithm, "RM") == 0 || strcmp(algorithm, "EDF") == 0);
     Process *processes = generate_processes(num_processes, is_real_time);
     
-    printf("\n=== Simulador de Escalonamento de Processos ===\n");
-    printf("Algoritmo: %s\n", algorithm);
-    printf("Número de processos: %d\n", num_processes);
-    if (strcmp(algorithm, "RR") == 0) {
-        printf("Quantum: %d\n", quantum);
-    }
-    
-    print_processes(processes, num_processes);
-
-    int total_time = 0;
+    print_initial_state(processes, num_processes);
 
     // Executa o algoritmo selecionado
     if (strcmp(algorithm, "FCFS") == 0) {
+        printf("\n=== Executando FCFS (First-Come, First-Served) ===\n");
         run_fcfs(processes, num_processes);
     } 
     else if (strcmp(algorithm, "SJF_NP") == 0) {
+        printf("\n=== Executando SJF não preemptivo (Shortest Job First) ===\n");
         run_sjf_nonpreemptive(processes, num_processes);
     }
     else if (strcmp(algorithm, "SJF_P") == 0) {
+        printf("\n=== Executando SJF preemptivo (Shortest Remaining Time First) ===\n");
         run_sjf_preemptive(processes, num_processes);
     }
     else if (strcmp(algorithm, "PRIORITY_NP") == 0) {
+        printf("\n=== Executando Priority Scheduling não preemptivo ===\n");
         run_priority_nonpreemptive(processes, num_processes);
     }
     else if (strcmp(algorithm, "PRIORITY_P") == 0) {
+        printf("\n=== Executando Priority Scheduling preemptivo ===\n");
         run_priority_preemptive(processes, num_processes);
     }
     else if (strcmp(algorithm, "RR") == 0) {
@@ -72,31 +67,38 @@ int main(int argc, char *argv[]) {
             free_processes(processes);
             return 1;
         }
+        printf("\n=== Executando Round Robin (Quantum=%d) ===\n", quantum);
         run_rr(processes, num_processes, quantum);
     }
     else if (strcmp(algorithm, "RM") == 0) {
+        printf("\n=== Executando Rate Monotonic Scheduling ===\n");
         run_rate_monotonic(processes, num_processes);
     }
     else if (strcmp(algorithm, "EDF") == 0) {
+        printf("\n=== Executando Earliest Deadline First Scheduling ===\n");
         run_edf(processes, num_processes);
     }
     else {
-        printf("Erro: Algoritmo desconhecido\n");
+        printf("Erro: Algoritmo desconhecido!\n");
         print_usage(argv[0]);
         free_processes(processes);
         return 1;
     }
 
-    // Calcular o tempo total de execução
+    // Calcula tempo total de execução
+    int total_time = 0;
     for (int i = 0; i < num_processes; i++) {
         if (processes[i].completion_time > total_time) {
             total_time = processes[i].completion_time;
         }
     }
 
-
+    // Mostra resultados
+    print_final_results(processes, num_processes);
+    
     SchedulerStats stats = calculate_stats(processes, num_processes, total_time);
     print_stats(stats);
+    
     free_processes(processes);
     return 0;
 }

@@ -4,7 +4,7 @@ INCLUDES = -Iinclude
 CFLAGS = -Wall -c $(INCLUDES)
 LDFLAGS = -lm
 SRC = src
-OBJ = main.o process.o scheduler.o stats.o distributions.o
+OBJ = main.o process.o scheduler.o stats.o distributions.o utils.o
 
 all: probsched
 
@@ -25,6 +25,9 @@ stats.o: $(SRC)/stats.c
 
 distributions.o: $(SRC)/distributions.c
 	$(CC) $(CFLAGS) $(SRC)/distributions.c -o distributions.o
+	
+utils.o: $(SRC)/utils.c
+	$(CC) $(CFLAGS) $(SRC)/utils.c -o utils.o
 
 clean limpar:
 	rm -f probsched *.o
