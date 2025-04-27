@@ -40,7 +40,7 @@ void run_fcfs(Process *processes, int n) {
     }
 }
 
-void run_sjf_nonpreemptive(Process *processes, int n) {    
+void run_sj(Process *processes, int n) {    
     int current_time = 0;
     int completed = 0;
     int *completed_flags = calloc(n, sizeof(int));
@@ -70,48 +70,6 @@ void run_sjf_nonpreemptive(Process *processes, int n) {
     }
     
     free(completed_flags);
-}
-
-void run_sjf_preemptive(Process *processes, int n) {    
-    int *remaining_time = malloc(n * sizeof(int));
-    
-    for (int i = 0; i < n; i++) {
-        remaining_time[i] = processes[i].burst_time;
-    }
-    
-    int current_time = 0;
-    int completed = 0;
-    
-    while (completed < n) {
-        int shortest_index = -1;
-        int shortest_time = __INT_MAX__;
-        
-        for (int i = 0; i < n; i++) {
-            if (remaining_time[i] > 0 && processes[i].arrival_time <= current_time && 
-                remaining_time[i] < shortest_time) {
-                shortest_time = remaining_time[i];
-                shortest_index = i;
-            }
-        }
-        
-        if (shortest_index == -1) {
-            current_time++;
-            continue;
-        }
-        
-        remaining_time[shortest_index]--;
-        current_time++;
-        
-        if (remaining_time[shortest_index] == 0) {
-            completed++;
-            processes[shortest_index].completion_time = current_time;
-            processes[shortest_index].waiting_time = processes[shortest_index].completion_time - 
-                                                    processes[shortest_index].arrival_time - 
-                                                    processes[shortest_index].burst_time;
-        }
-    }
-    
-    free(remaining_time);
 }
 
 void run_priority_nonpreemptive(Process *processes, int n) {    

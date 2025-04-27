@@ -11,8 +11,7 @@ void print_usage(const char *program_name) {
     printf("Uso: %s <algoritmo> <num_processos> [quantum]\n", program_name);
     printf("Algoritmos disponíveis:\n");
     printf("  FCFS          - First-Come, First-Served\n");
-    printf("  SJF_NP        - Shortest Job First (não preemptivo)\n");
-    printf("  SJF_P         - Shortest Remaining Time First (preemptivo)\n");
+    printf("  SJ            - Shortest Job\n");
     printf("  PRIORITY_NP   - Priority Scheduling (não preemptivo)\n");
     printf("  PRIORITY_P    - Priority Scheduling (preemptivo)\n");
     printf("  RR            - Round Robin (requer quantum)\n");
@@ -45,13 +44,9 @@ int main(int argc, char *argv[]) {
         printf("\n=== Executando FCFS (First-Come, First-Served) ===\n");
         run_fcfs(processes, num_processes);
     } 
-    else if (strcmp(algorithm, "SJF_NP") == 0) {
-        printf("\n=== Executando SJF não preemptivo (Shortest Job First) ===\n");
-        run_sjf_nonpreemptive(processes, num_processes);
-    }
-    else if (strcmp(algorithm, "SJF_P") == 0) {
-        printf("\n=== Executando SJF preemptivo (Shortest Remaining Time First) ===\n");
-        run_sjf_preemptive(processes, num_processes);
+    else if (strcmp(algorithm, "SJ") == 0) {
+        printf("\n=== Executando SJ (Shortest Job First) ===\n");
+        run_sj(processes, num_processes);
     }
     else if (strcmp(algorithm, "PRIORITY_NP") == 0) {
         printf("\n=== Executando Priority Scheduling não preemptivo ===\n");
@@ -94,6 +89,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Mostra resultados
+    print_timeline(processes, num_processes);
     print_final_results(processes, num_processes);
     
     SchedulerStats stats = calculate_stats(processes, num_processes, total_time);
