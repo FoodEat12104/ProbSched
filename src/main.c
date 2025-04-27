@@ -72,12 +72,12 @@ int main(int argc, char *argv[]) {
     else if (strcmp(algorithm, "RM") == 0) {
         printf("\n=== Executando Rate Monotonic Scheduling ===\n");
         run_rate_monotonic(processes, num_processes);
-        print_preemptive(processes, num_processes, true);
+        print_rm(processes, num_processes);
     }
     else if (strcmp(algorithm, "EDF") == 0) {
         printf("\n=== Executando Earliest Deadline First Scheduling ===\n");
         run_edf(processes, num_processes);
-        print_preemptive(processes, num_processes, false);
+        print_edf(processes, num_processes);
     }
     else {
         printf("Erro: Algoritmo desconhecido!\n");
