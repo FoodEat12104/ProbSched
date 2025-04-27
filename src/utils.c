@@ -20,7 +20,7 @@ int compare_period(const void *a, const void *b) {
 }
 
 void print_initial_state(Process *processes, int n) {
-    printf("\n=== Estado Inicial ===\n\n");
+    printf("\n=== Simulador de Escalonamento de Processos ===\n\n");
     printf("%-5s %-8s %-6s %-10s %-7s %-9s\n",
            "PID", "Chegada", "Burst", "Prioridade", "Período", "Deadline");
     printf("-------------------------------------------------\n");
